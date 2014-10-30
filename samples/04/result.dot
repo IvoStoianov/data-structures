@@ -1,0 +1,8 @@
+digraph {
+0 -> 1 [label="a"];
+1 -> 2 [label="z"];
+3 -> 4 [label="b"];
+4 -> 5 [label="w"];
+6 -> 1 [label="a"];
+6 -> 4 [label="b"];
+2[style=filled]5[style=filled]}
