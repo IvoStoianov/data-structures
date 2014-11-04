@@ -5,6 +5,7 @@
 #include <string.h>
 #include <string>
 #include <vector>
+#include <fstream>
 
 using namespace std;
 
@@ -160,21 +161,14 @@ public:
 
 		int count;
 		char symbol;
-		int minStateIndex = MAX_STATE;
 
 		for (count = 0; count < MAX_STATE; count++)
 		{
-			for (symbol = 0; symbol < 'z' - 'a'; symbol++)
+			for (symbol = 0; symbol < 'z' - 'a' + 1; symbol++)
 			{
-				if (table[count][symbol].size() > 0)
-				{
-					minStateIndex = min (minStateIndex,count);	
-					vector<int> &toStates = table[count][symbol];
-					for (int i = 0; i < toStates.size(); i++)
-						toStates[i] += toAdd;
-				}
-
-
+				vector<int> &toStates = table[count][symbol];
+				for (int i = 0; i < toStates.size(); i++)
+					toStates[i] += toAdd;
 			}
 		}
 
@@ -183,11 +177,11 @@ public:
 		{
 			for (count = 0; count < MAX_STATE + toAdd; count++)
 			{
-				for (symbol = 0; symbol < 'z' - 'a'; symbol++)
+				for (symbol = 0; symbol < 'z' - 'a' + 1; symbol++)
 				{
 					table[count][symbol] = table[count-toAdd][symbol];
 					//изтриване на преходите на копираното състояние
-					table[count-toAdd][symbol] = vector<int>;
+					table[count-toAdd][symbol].clear();
 				}
 
 				final[count] = final[count-toAdd];
@@ -196,18 +190,19 @@ public:
 			}
 		} else if (toAdd > 0)
 		{
+
 			for (count = MAX_STATE-1; count >= toAdd; count--)
 			{
-				for (symbol = 0; symbol < 'z' - 'a'; symbol++)
+				for (symbol = 0; symbol < 'z' - 'a' + 1; symbol++)
 				{
 					table[count][symbol] = table[count-toAdd][symbol];
 					//изтриване на преходите на копираното състояние
-					table[count-toAdd][symbol] = vector<int>;
+					table[count-toAdd][symbol].clear();
 				}
 
+				final[count] = final[count-toAdd];
+				final[count-toAdd] = false;
 			}
-			final[count] = final[count-toAdd];
-			final[count-toAdd] = false;
 
 		}
 
@@ -312,6 +307,11 @@ ostream& operator << (ostream &out, const NFSA& a)
 
 	out << "digraph {" << endl;
 
+	
+	//отпечатваме началното състояние като правоъгълник
+
+	out << a.startState << "[shape=box]";
+
 	//отпечатваме списък с всички преходи
 
 	for (state = 0; state < MAX_STATE; state++)
@@ -378,6 +378,22 @@ int main ()
 	b.addTrans (1,2,'w');
 	b.setFinal (2);
 
-	cout << a+b;
+	//създаваме текстови файлове, в които
+	//ше запишем състоянието на автомата
+	//преди и след операциите с него
+	ofstream before ("before.dot");
+	ofstream after1 ("after1.dot");
+	ofstream after2 ("after2.dot");
+
+	before << a;
+
+	a.shiftStateIndexes (10);
+
+	after1 << a;
+
+	a.shiftStateIndexes (5);
+
+	after2 << a;
+
 
 }
