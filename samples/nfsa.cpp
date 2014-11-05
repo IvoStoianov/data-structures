@@ -207,6 +207,7 @@ public:
 		}
 
 		startState += toAdd;
+		maxUsedState += toAdd;
 
 	}
 
@@ -289,9 +290,6 @@ public:
 
 		}
 	}
-
-
-
 
 
 };
