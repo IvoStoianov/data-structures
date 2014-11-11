@@ -20,26 +20,22 @@ private:
 	int startState, maxUsedState;
 	bool final[MAX_STATE];
 
-
 public:
 
 	NFSA operator + (const NFSA& a)
 	{
-
-		//*this, a
+		//*this + a
 
 		NFSA result;
 
-		//копираме таблицата на this
-
+		//1. копираме таблицата на this
 		int state; char symbol;
 		for (state = 0; state < MAX_STATE; state++)
 			for (symbol = 0; symbol < 27; symbol ++)
 				result.table[state][symbol] = table[state][symbol];
 
-		//копираме таблицата на a
+		//2. копираме таблицата на a
 		//с ПРЕИНДЕКСИРАНЕ 
-
 		int oldFromStateNumber, 
 		    newFromStateNumber, 
 		    oldToStateNumber, 
@@ -53,78 +49,53 @@ public:
 			 oldFromStateNumber++)
 		{
 			newFromStateNumber = oldFromStateNumber + this->maxUsedState+1;
-
 			for (symbol = 0; symbol < 27; symbol ++)
 			{
 				oldToStates = a.table[oldFromStateNumber][symbol];
-
 				for (count = 0; count < oldToStates.size(); count++)
 				{
-
 					oldToStateNumber = oldToStates[count];
-
 					newToStateNumber = oldToStateNumber + this->maxUsedState+1;
-
 					result.table[newFromStateNumber][symbol].push_back(newToStateNumber);
-
 				}
 			}
 		}
-
 		result.startState = this->maxUsedState + a.maxUsedState + 2;
 		result.maxUsedState = result.startState;
 
-		//копираме преходите от старите начални
+		//3. копираме преходите от старите начални
 		//състояния към новото начално състояние
-
 		for (symbol = 0; symbol < 27; symbol++)
 		{
-
 			result.table[result.startState][symbol] =
 				this->table[this->startState][symbol];
-
 		}
-
-
 		for (symbol = 0; symbol < 27; symbol++)
 		{
-
 			oldToStates = a.table[a.startState][symbol];
-
 			for (count = 0; count < oldToStates.size(); count++)
 			{
 				newToStateNumber = oldToStates[count] + this->maxUsedState+1;
 				result.table[result.startState][symbol].push_back (newToStateNumber);
 			}
-
 		}
 
-		//прехвърляне на финалните състояния
-
+		//4. прехвърляне на финалните състояния
 		for (state = 0; state < MAX_STATE; state++)
 		{
 			if (this->final[state])
 				result.final[state] = true;
-
 			if (a.final[state])
 				result.final[state+this->maxUsedState+1] = true;
-
 		}
-
 		if (this->final[this->startState] || a.final[a.startState])
 			result.final[result.startState] = true;
-
-
 		return result;
-
-
 	}
 
 	int minStateIndex ()
 	{
-
 //	vector<int> table[MAX_STATE][27];
-		
 		int count;
 		char symbol;
 		int minStateIndex = MAX_STATE;
@@ -140,11 +111,8 @@ public:
 					for (int i = 0; i < toStates.size(); i++)
 						minStateIndex = min (minStateIndex,toStates[i]);
 				}
-
-
 			}
 		}
-
 		return minStateIndex;
 	}
 
@@ -159,9 +127,8 @@ public:
 
 		assert (toAdd+maxUsedState < MAX_STATE);
 
-		int count;
-		char symbol;
-
+		int count=-1, symbol=-1;
+		
 		for (count = 0; count < MAX_STATE; count++)
 		{
 			for (symbol = 0; symbol < 'z' - 'a' + 1; symbol++)
@@ -171,50 +138,42 @@ public:
 					toStates[i] += toAdd;
 			}
 		}
-
-		if (toAdd < 0)
-			//например, toAdd == -2
+		if (toAdd < 0) //например, toAdd == -2			
 		{
 			for (count = 0; count < MAX_STATE + toAdd; count++)
 			{
-				for (symbol = 0; symbol < 'z' - 'a' + 1; symbol++)
-				{
-					table[count][symbol] = table[count-toAdd][symbol];
-					//изтриване на преходите на копираното състояние
-					table[count-toAdd][symbol].clear();
-				}
-
-				final[count] = final[count-toAdd];
-				final[count-toAdd] = false;
-
+				replaceStateWith (count,count-toAdd);	
 			}
 		} else if (toAdd > 0)
 		{
-
 			for (count = MAX_STATE-1; count >= toAdd; count--)
 			{
-				for (symbol = 0; symbol < 'z' - 'a' + 1; symbol++)
-				{
-					table[count][symbol] = table[count-toAdd][symbol];
-					//изтриване на преходите на копираното състояние
-					table[count-toAdd][symbol].clear();
-				}
-
-				final[count] = final[count-toAdd];
-				final[count-toAdd] = false;
+				replaceStateWith (count,count-toAdd);				
 			}
-
 		}
-
 		startState += toAdd;
 		maxUsedState += toAdd;
-
 	}
 
+private:
+	void replaceStateWith (int state, int replaceWith)
+	//замества всички преходи, ИЗЛИЗАЩИ от state с преходи,
+	//илизащи от replaceWith
+	{
+		for (int symbol = 0; symbol < 'z' - 'a' + 1; symbol++)
+		{
+			table[state][symbol] = table[replaceWith][symbol];
+			//изтриване на преходите на копираното състояние
+			table[replaceWith][symbol].clear();
+		}
+
+		final[state] = final[replaceWith];
+		final[replaceWith] = false;
+	}
+public:
 
 	NFSA ()
 	{
-		
 		startState = 0;
 		maxUsedState = 0;
 		for (int i = 0; i < MAX_STATE; i++)
@@ -258,21 +217,14 @@ public:
 			if (recognize (nextStates[count],tail))
 				return true;
 		}
-
 		return false;
-
-
 	}
-
 
 	void printAllWordsFrom (int currentState, string currentString)
 	{
-		
-
 		if (final[currentState])
 		{
 			cout << currentString << endl;
-
 		}
 
 		char symbol;
@@ -281,37 +233,26 @@ public:
 		for (symbol = 'a'; symbol <= 'z'; symbol++)
 		{
 			nextStates = table[currentState][symbol-'a'];
-
 			for (int count = 0; count < nextStates.size(); count++)
 			{
-			
 				printAllWordsFrom (nextStates[count],currentString+symbol);
 			}
-
 		}
 	}
-
-
 };
-
 
 ostream& operator << (ostream &out, const NFSA& a)
 {
-
 	char symbol;
 
 	int state, toState, i;
 
-
 	out << "digraph {" << endl;
 
-	
 	//отпечатваме началното състояние като правоъгълник
-
 	out << a.startState << "[shape=box]";
 
 	//отпечатваме списък с всички преходи
-
 	for (state = 0; state < MAX_STATE; state++)
 	{
 		for (symbol = 'a'; symbol <= 'z'; symbol++)
@@ -320,28 +261,23 @@ ostream& operator << (ostream &out, const NFSA& a)
 
 			for (i = 0; i < targetStates.size(); i++)
 				out << state << " -> " << targetStates[i] << " [label=\"" << symbol << "\"];" << endl;
-
 		}
 	}
 
 	//отпечатваме списък с всички финални с-я
-
 	for (state = 0; state < MAX_STATE; state++)
 		if (a.final[state])
 			out << state << "[style=filled]";
 
 	out << "}" << endl;
 
-
 	//dot -Tpdf test.dot -o test.pdf
-
 	return out;
 }
 
 
 int main ()
 {
-
 
 /*	NFSA a;
 
@@ -358,9 +294,6 @@ int main ()
 
 	cout << a;
 */
-
-
-
 
 	//cout << "abz=" << a.recognize (0,"abz") << endl;
 
@@ -392,6 +325,4 @@ int main ()
 	a.shiftStateIndexes (5);
 
 	after2 << a;
-
-
 }
