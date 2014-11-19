@@ -5,35 +5,30 @@
 
 using namespace std;
 
-
 template <class KeyType, class ValType>
 class Dictionary
 {
-
 private:
 	vector<KeyType> keys;
 	vector<ValType> values;
 
-	int keyIndex (KeyType key)
+	int keyIndex (const KeyType& key)
 	//or returns -1
 	{
 		for (int count = 0; count < keys.size(); count++)
 			if (keys[count] == key)
 				return count;
-
 		return -1;
 	}
 public:
 
-
-	ValType getValue (KeyType key)
+	ValType getValue (const KeyType& key)
 	{
 		int index = keyIndex (key);
 
 		assert (index != -1);
 
 		return values[index];
-
 	}
 
 	void setPair (KeyType key, ValType value)
@@ -47,7 +42,6 @@ public:
 			keys.push_back(key);
 			values.push_back (value);
 		}
-
 	}
 
 	ValType& operator [] (KeyType key)
@@ -69,7 +63,6 @@ public:
 		return values[index];
 	}
 
-
 	void printAll (ostream &out)
 	{
 		for (int count = 0; count < keys.size(); count++)
@@ -84,7 +77,6 @@ public:
 	}
 
 };
-
 
 int main ()
 {

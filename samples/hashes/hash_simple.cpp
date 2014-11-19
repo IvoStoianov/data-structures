@@ -5,16 +5,11 @@
 
 using namespace std;
 
-
 //ВНИМАНИЕ: C++ 11!
 //g++ hash_simple.cpp -std=c++11
 template <class KeyType>
 using HashFunction = int (*)(const KeyType&);
-//HasFunction е тип указател към ф-я с два аргумента и резутат int
-
-
-
-
+//HasFunction е тип указател към ф-я с един аргумент (ключ) и резутат int
 
 template <class KeyType, class ValType>
 class HashMap
@@ -27,28 +22,23 @@ private:
 	//entries[i][j].first -> ключ
 	//entries[i][j].second -> стойност
 
-
 	//entries.size () - размер на ХТ
-
 
 	HashFunction<KeyType> hash;
 
-
-	int subIndexOf (KeyType key, int hashCode)
+	int subIndexOf (const KeyType& key, int hashCode)
 	{
 		for (int count = 0; 
 			 count < entries[hashCode].size(); 
 			 count++)
-
+		{
 			if (entries[hashCode][count].first == key)
 				return count;
-		
+		}
 		return -1;
 	}
 
-
 public:
-
 
 	HashMap (int size, HashFunction<KeyType> f)
 	{
@@ -64,32 +54,27 @@ public:
 		//entries[i], i=0,..,size-1
 	} 
 
-
 	void setPair (KeyType key, ValType value)
 	{
-
 		int hashCode = hash (key) % entries.size();
 		int subIndex = subIndexOf (key,hashCode);
 
 		if (subIndex == -1)
 		{
 			//entries[hashCode]
-			//НЕ Е ЗАДЪЛЖИТЕЛНО ПРАЗЕН
+			//НЕ Е ЗАДЪЛЖИТЕЛНО ПРАЗЕН,
+			//може да съдържа други key-value с ключове,
+			//с които имаме колизия
 			pair<KeyType,ValType> keyvalue;
 			keyvalue.first = key;
 			keyvalue.second = value;
 			entries[hashCode].push_back (keyvalue);
 
 		} else {
-			//сменам телефонния номер на Сандра
-
+			//"сменам телефонния номер на Сандра"
 			entries[hashCode][subIndex].second = value;
 		}
-
-
 	}
-
-
 
 	ValType getValue (KeyType key)
 	{
@@ -99,46 +84,22 @@ public:
 		assert (subIndex != -1);
 
 		return entries[hashCode][subIndex].second;
-
 	}
 /*
 
 
-	ValType& operator [] (KeyType key)
-	{
-		int index = keyIndex (key);
-
-		if (index == -1)
-		{
-			ValType dummy;
-			setPair (key,dummy);
-			//index = keys.size()-1
-			//лошо - разчитаме, че знаем как работи
-			//setPair
-			index = keyIndex (key);
-		}
-
-		assert (index != -1);
-		
-		return values[index];
+	ValType& operator [] (const KeyType& key)
+	{		
 	}
-
 
 	void printAll (ostream &out)
 	{
-		for (int count = 0; count < keys.size(); count++)
-		{
-			out << keys[count] << ":" << values[count] << endl;
-		}
 	}
 
 	bool hasKey (KeyType key)
 	{
-		return keyIndex (key) != -1;
 	}
-
 	*/
-
 };
 
 
