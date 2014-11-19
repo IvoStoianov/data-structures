@@ -100,11 +100,14 @@ public:
 	}
 
 };
-
+//<while_expr> ::= while <expr> <expr>
+//while x set x (- x 1)
 class If : public Expression
 {
 private:
-	Expression *condition, *thenCase, *elseCase;
+	Expression *condition, 
+	           *thenCase, 
+	           *elseCase;
 public:
 	double value ()
 	{
@@ -112,14 +115,16 @@ public:
 			return thenCase->value();
 		return elseCase->value();
 	}
-
+	//!
 	If (Expression *cond, 
 		Expression *th, 
-		Expression *el):condition (cond), thenCase (th), elseCase (el){}
+		Expression *el):condition (cond), 
+	                    thenCase (th), 
+	                    elseCase (el){}
 
 	void print (ostream &out)
 	{
-		//???
+			//???
 
 	}
 
