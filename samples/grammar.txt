@@ -17,12 +17,18 @@
 
 
 BNR:
-<expr> ::= <number> | <sum_expr> | <div_expr> | <mul_expr>  |<min_expr> | <kPlus> | <ifExpr>
+<expr> ::= <number> | <sum_expr> | <div_expr> | <mul_expr>  |<min_expr> | <kPlus> | <ifExpr> | <var_set_expr> | <var_read_expr> | <block_expr>
 
 <sum_expr> ::= + <expr> <expr>
 <div_expr> ::= / <expr> <expr>
 <mul_expr> ::= * <expr> <expr>
 <min_expr> ::= - <expr> <expr>
+
+<block_expr> ::= begin <expr> .... <expr> end
+
+
+<var_set_expr> ::= set <var_name> <expr>
+<var_read_expr> ::=  $<var_name>   
 
 <ifExpr> ::= if <expr> then <expr> else <expr>
 //+ 1 if 0 then 5 else + 1 1 --> 3
@@ -36,6 +42,7 @@ BNR:
 <expr> ::= <number>
 <number> ::= {0..9}+
 
+for, false
 
 00007
 
@@ -58,4 +65,5 @@ BNR:
 1 + 2
 
 + 1 2
+//създаване, инициализиране, просв. стойност, четене
 

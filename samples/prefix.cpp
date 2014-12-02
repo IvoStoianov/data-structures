@@ -1,6 +1,11 @@
 #include <iostream>
 #include <fstream>
 #include <assert.h>
+#include <map>
+#include <vector>
+
+
+#include "tokenizer.h"
 
 using namespace std;
 
@@ -74,6 +79,48 @@ public:
 
 };
 
+//!!!
+map<string,int> variables;
+
+class ReadVar : public Expression
+{
+private:
+	string varName;
+public:
+	ReadVar (string name):varName(name){}
+	double value ()
+	{
+		return variables[varName];
+	}
+
+	void print (ostream &out)
+	{}
+
+
+};
+
+class SetVar : public Expression
+{
+
+private:
+	string varName;
+	Expression *expr;	
+public:
+
+	SetVar (string name, Expression *ex):varName(name),expr (ex){}
+
+	double value ()
+	{
+		variables[varName] = expr->value();
+		return variables[varName];
+	}
+
+	void print (ostream &out)
+	{}
+
+
+};
+
 class Mul : public Expression
 {
 
@@ -100,6 +147,33 @@ public:
 	}
 
 };
+
+class Block : public Expression
+{
+private:
+	vector <Expression*> expressions;
+public:
+	Block () {}
+	void addExpression (Expression *e)
+	{
+		expressions.push_back (e);
+	}
+	double value ()
+	{
+		double lastVal;
+		for (int i = 0; i < expressions.size(); i++)
+		{
+			lastVal=expressions[i]->value();
+		}
+		return lastVal;
+	}
+	void print (ostream &out)
+	{
+
+	}
+
+};
+
 //<while_expr> ::= while <expr> <expr>
 //while x set x (- x 1)
 class If : public Expression
@@ -130,30 +204,23 @@ public:
 
 };
 
-bool isDigit (char c)
+Expression* createTree (Tokenizer&);
+
+
+Expression* createNumber (Tokenizer& input)
 {
-	return c >= '0' && c <= '9';
+	input.readToken();
+	return new Number (atoi(input.lastTokenString().c_str()));
 }
 
-Expression* createTree (istream&);
-
-
-Expression* createNumber (istream& input)
-{
-	double val;
-	input >> val;
-	return new Number (val);
-}
-
-Expression* createSum (istream& input)
+Expression* createSum (Tokenizer& input)
 {
 //В този момент знаем, че на входа
 //чака израз от вида
 //+<expr><expr>
 
 
-	char c;
-	input >> c;
+	input.readToken();
 	//В този момент знаем, че на входа
 	//чака израз от вида
 	//<expr><expr>
@@ -169,15 +236,14 @@ Expression* createSum (istream& input)
 
 }
 
-Expression* createMul (istream& input)
+Expression* createMul (Tokenizer& input)
 {
 //В този момент знаем, че на входа
 //чака израз от вида
-//*<expr><expr>
+//* <expr> <expr>
 
 
-	char c;
-	input >> c;
+	input.readToken();
 	//В този момент знаем, че на входа
 	//чака израз от вида
 	//<expr><expr>
@@ -193,29 +259,110 @@ Expression* createMul (istream& input)
 
 }
 
-void eatWhiteSpaces (istream &input)
+Expression* createIf (Tokenizer& input)
 {
-	while (input.peek() == 32 || 
-		   input.peek () == 10 ||
-		   input.peek () == 13)
-		input.get();
+//В този момент знаем, че на входа
+//чака израз от вида
+//<ifExpr> ::= if <expr> then <expr> else <expr>
+
+	input.readToken();
+
+	//<expr> then <expr> else <expr>
+	Expression *condition = createTree (input);
+
+	//then <expr> else <expr>
+	assert (input.readToken()==Tokenizer::TokenThen);
+
+	//<expr> else <expr>
+	Expression *thenCase = createTree (input);
+
+	//else <expr>
+	assert (input.readToken()==Tokenizer::TokenElse);
+
+	//<expr>
+	Expression *elseCase = createTree (input);
+
+	return new If (condition,thenCase,elseCase);
+
+
 }
 
-Expression* createTree (istream& input)
+
+Expression *createSetVar (Tokenizer& input)
+{
+	//<var_set_expr> ::= set <var_name> <expr>
+
+	input.readToken();
+
+	//<var_name> <expr>
+
+	input.readToken();
+	//НЕ роверихме, че не е ключова дума
+	string name = input.lastTokenString ();
+
+	//<expr>
+	Expression *val = createTree (input);
+
+	return new SetVar (name,val);
+}
+
+Expression *createReadVar (Tokenizer& input)
+{
+	//<var_read_expr> ::=  $<var_name>   
+
+	input.readToken ();
+
+	string token = input.lastTokenString();
+
+	return new ReadVar (token.substr(1,token.size()-1));
+}
+
+Expression *createBlock (Tokenizer& input)
+{//<block_expr> ::= begin <expr> .... <expr> end
+
+
+	input.readToken();
+
+	Block *result = new Block ();
+
+	while (input.peekToken () != Tokenizer::TokenEnd)
+	{
+		result->addExpression (createTree (input));
+	}
+
+	//end
+	input.readToken();
+
+	return result;
+
+}
+
+Expression* createTree (Tokenizer& input)
 {
 
-	eatWhiteSpaces (input);
-
-	if (isDigit (input.peek()))
+	if (input.peekToken() == Tokenizer::TokenNumber)
 		return createNumber (input);
 
-	if (input.peek() == '+')
+	if (input.peekToken() == Tokenizer::TokenPlus)
 		return createSum(input);
 
-	if (input.peek() == '*')
+	if (input.peekToken() == Tokenizer::TokenMult)
 		return createMul(input);
 
-	cerr << "Uknown operator:" << input.peek() << endl;
+	if (input.peekToken() == Tokenizer::TokenIf)
+		return createIf(input);
+
+	if (input.peekToken() == Tokenizer::TokenSetVar)
+		return createSetVar (input);
+
+	if (input.peekToken() == Tokenizer::TokenReadVar)
+		return createReadVar (input);
+
+	if (input.peekToken() == Tokenizer::TokenBegin)
+		return createBlock (input);
+
+
+	cerr << "Uknown operator:" << input.lastTokenString() << endl;
 	assert (false);
 	return NULL;
 }
@@ -232,6 +379,9 @@ void printToStream (ostream &out, Expression *expr)
 
 int main ()
 {
+
+
+
 /*	//1
 	Expression *myExpr1 = new Number (1);
 
@@ -259,7 +409,10 @@ int main ()
 
 	*/
 
-	Expression *myExpr = createTree (cin);
+	
+	Tokenizer t(cin);
+
+	Expression *myExpr = createTree (t);
 
 	cout << "val=" << myExpr->value() << endl;
 
