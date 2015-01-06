@@ -18,6 +18,7 @@ void Tokenizer::initKeywords ()
 		keywords["set"] = Tokenizer::TokenSetVar;
 		keywords["begin"] = Tokenizer::TokenBegin;
 		keywords["end"] = Tokenizer::TokenEnd;
+		keywords["print"] = Tokenizer::TokenPrint;
 		keywordsInitialized = true;
 	}
 }

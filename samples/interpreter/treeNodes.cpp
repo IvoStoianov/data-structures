@@ -126,3 +126,14 @@ void If::print (ostream &out)
 		//???
 
 }
+
+Print::Print(Expression *toPrint):expr(toPrint){};
+
+double Print::value ()
+{
+	int val = expr->value();
+	cout << endl << val << endl;
+	return val;
+}
+
+void Print::print (ostream &out){}

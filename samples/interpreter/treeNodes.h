@@ -115,4 +115,17 @@ public:
 	void print (ostream &out);
 };
 
+class Print : public Expression
+{
+private:
+	Expression *expr;
+
+public:
+
+	Print(Expression *toPrint);
+	double value ();
+	void print (ostream &out);
+
+};
+
 #endif

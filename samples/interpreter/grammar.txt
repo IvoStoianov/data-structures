@@ -17,7 +17,7 @@
 
 
 BNR:
-<expr> ::= <number> | <sum_expr> | <div_expr> | <mul_expr>  |<min_expr> | <kPlus> | <ifExpr> | <var_set_expr> | <var_read_expr> | <block_expr>
+<expr> ::= <number> | <sum_expr> | <div_expr> | <mul_expr>  |<min_expr> | <kPlus> | <ifExpr> | <var_set_expr> | <var_read_expr> | <block_expr> | <print_expr>
 
 <sum_expr> ::= + <expr> <expr>
 <div_expr> ::= / <expr> <expr>
@@ -26,6 +26,7 @@ BNR:
 
 <block_expr> ::= begin <expr> .... <expr> end
 
+<print_expr> ::= print <expr>
 
 <var_set_expr> ::= set <var_name> <expr>
 <var_read_expr> ::=  $<var_name>   

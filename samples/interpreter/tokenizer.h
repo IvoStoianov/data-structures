@@ -37,6 +37,7 @@ public:
 	static const int TokenReadVar = 7;
 	static const int TokenBegin = 8;
 	static const int TokenEnd = 9;
+	static const int TokenPrint = 10;
 
 	int lastTokenType ();
 	string lastTokenString();

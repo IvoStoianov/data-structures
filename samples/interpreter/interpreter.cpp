@@ -122,6 +122,17 @@ Expression *parseReadVar (Tokenizer& input)
 	return new ReadVar (token.substr(1,token.size()-1));
 }
 
+
+Expression *parsePrint (Tokenizer& input)
+{
+	//<print_expr> ::= print <expr>
+
+	input.readToken ();
+
+	//expr
+	return new Print (parseTree (input));
+}
+
 Expression *parseBlock (Tokenizer& input)
 {//<block_expr> ::= begin <expr> .... <expr> end
 
@@ -165,6 +176,9 @@ Expression* parseTree (Tokenizer& input)
 
 	if (input.peekToken() == Tokenizer::TokenBegin)
 		return parseBlock (input);
+
+	if (input.peekToken() == Tokenizer::TokenPrint)
+		return parsePrint (input);
 
 
 	cerr << "Uknown operator:" << input.lastTokenString() << endl;
@@ -219,7 +233,7 @@ int main ()
 
 	Expression *myExpr = parseTree (t);
 
-	cout << "val=" << myExpr->value() << endl;
+	myExpr->value();
 
 
 	ofstream out ("expression.dot");
