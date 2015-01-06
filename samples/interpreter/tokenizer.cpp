@@ -19,6 +19,13 @@ void Tokenizer::initKeywords ()
 		keywords["begin"] = Tokenizer::TokenBegin;
 		keywords["end"] = Tokenizer::TokenEnd;
 		keywords["print"] = Tokenizer::TokenPrint;
+		keywords["for"] = Tokenizer::TokenFor;
+		keywords["from"] = Tokenizer::TokenFrom;
+		keywords["to"] = Tokenizer::TokenTo;
+		keywords["step"] = Tokenizer::TokenStep;
+		keywords["do"] = Tokenizer::TokenDo;
+		keywords["function"] = Tokenizer::TokenFunction;
+		keywords["call"] = Tokenizer::TokenCall;
 		keywordsInitialized = true;
 	}
 }

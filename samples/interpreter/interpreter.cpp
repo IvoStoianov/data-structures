@@ -15,7 +15,7 @@ Expression* parseTree (Tokenizer&);
 Expression* parseNumber (Tokenizer& input)
 {
 	input.readToken();
-	return new Number (atoi(input.lastTokenString().c_str()));
+	return new Number (atof(input.lastTokenString().c_str()));
 }
 
 Expression* parseSum (Tokenizer& input)
@@ -133,6 +133,54 @@ Expression *parsePrint (Tokenizer& input)
 	return new Print (parseTree (input));
 }
 
+Expression *parseFor (Tokenizer& input)
+{
+	//<for_expr> ::= for <var_name> from <expr> to <expr> step <expr> do <expr>
+
+	input.readToken ();
+
+	//<var_name> from <expr> to <expr> step <expr> do <expr>
+
+	input.readToken();
+	string varName = input.lastTokenString();
+
+	//from <expr> to <expr> step <expr> do <expr>
+
+	assert (input.readToken ()==Tokenizer::TokenFrom);
+
+	//<expr> to <expr> step <expr> do <expr>
+
+	Expression *fromExpr = parseTree (input);
+
+	//to <expr> step <expr> do <expr>
+
+	assert (input.readToken ()==Tokenizer::TokenTo);
+
+	//<expr> step <expr> do <expr>
+
+	Expression *toExpr = parseTree (input);
+
+	//step <expr> do <expr>
+
+	assert (input.readToken ()==Tokenizer::TokenStep);
+
+	//<expr> do <expr>
+
+	Expression *stepExpr = parseTree (input);
+
+	//do <expr>
+	assert (input.readToken ()==Tokenizer::TokenDo);
+
+	//<expr>
+
+	Expression *bodyExpr = parseTree (input);
+
+	return new For (varName,fromExpr,toExpr,stepExpr,bodyExpr);
+
+
+}
+
+
 Expression *parseBlock (Tokenizer& input)
 {//<block_expr> ::= begin <expr> .... <expr> end
 
@@ -147,11 +195,74 @@ Expression *parseBlock (Tokenizer& input)
 	}
 
 	//end
-	input.readToken();
+	assert (input.readToken () == Tokenizer::TokenEnd);
 
 	return result;
 
 }
+
+Expression *parseFunDef (Tokenizer& input)
+//<def_fn> ::= function (<var_name>)+ do <expr>  
+{
+	input.readToken();
+
+	//(<var_name>)+ do <expr>  
+
+	input.readToken();
+	string fnName = input.lastTokenString();
+
+	//(<var_name>)* do <expr>  
+
+	vector<string> varNames;
+
+	while (input.peekToken () != Tokenizer::TokenDo)
+	{
+		input.readToken();
+		varNames.push_back (input.lastTokenString());
+	}
+
+	//do <expr>  
+
+	assert (input.readToken () == Tokenizer::TokenDo);
+
+	//<expr>
+
+	Expression *body = parseTree (input);
+
+	return new FunDef (fnName, varNames, body);
+}
+
+
+Expression *parseFunCall (Tokenizer& input)
+//<call_fn> ::= call <var_name> <expr>* end 
+
+{
+
+	input.readToken();
+
+	//<var_name> <expr>* end 
+
+	input.readToken();
+	string fnName = input.lastTokenString();
+
+	//<expr>* end 
+
+	vector<Expression*> factArgs;
+
+	while (input.peekToken () != Tokenizer::TokenEnd)
+	{
+		factArgs.push_back (parseTree(input));
+	}
+
+	//end
+
+	assert (input.readToken () == Tokenizer::TokenEnd);
+
+
+	return new CallFn (fnName, factArgs);
+
+}
+
 
 Expression* parseTree (Tokenizer& input)
 {
@@ -180,6 +291,15 @@ Expression* parseTree (Tokenizer& input)
 	if (input.peekToken() == Tokenizer::TokenPrint)
 		return parsePrint (input);
 
+	if (input.peekToken() == Tokenizer::TokenFor)
+		return parseFor (input);
+
+	if (input.peekToken() == Tokenizer::TokenFunction)
+		return parseFunDef (input);
+
+	if (input.peekToken() == Tokenizer::TokenCall)
+		return parseFunCall (input);
+
 
 	cerr << "Uknown operator:" << input.lastTokenString() << endl;
 	assert (false);
@@ -196,7 +316,7 @@ void printToStream (ostream &out, Expression *expr)
 
 }
 
-int main ()
+int main (int argc,char**)
 {
 
 
@@ -233,7 +353,14 @@ int main ()
 
 	Expression *myExpr = parseTree (t);
 
-	myExpr->value();
+	if (argc == 1)
+		myExpr->value();
+	else
+	{
+		cout << "digraph{\n";
+		myExpr->print (cout);
+		cout << "}";
+	}
 
 
 	ofstream out ("expression.dot");

@@ -1,3 +1,13 @@
+
+
+functions:
+- name
+- argument names
+- body
+
+- definition
+- application
+
 *,/,+,-
 
 
@@ -17,12 +27,22 @@
 
 
 BNR:
-<expr> ::= <number> | <sum_expr> | <div_expr> | <mul_expr>  |<min_expr> | <kPlus> | <ifExpr> | <var_set_expr> | <var_read_expr> | <block_expr> | <print_expr>
+<expr> ::= <number> | <sum_expr> | <div_expr> | <mul_expr>  |<min_expr> | <kPlus> | <ifExpr> | <var_set_expr> | <var_read_expr> | <block_expr> | <print_expr> | <for_expr> | <def_fn> | <call_fn> 
 
 <sum_expr> ::= + <expr> <expr>
 <div_expr> ::= / <expr> <expr>
 <mul_expr> ::= * <expr> <expr>
 <min_expr> ::= - <expr> <expr>
+
+<for_expr> ::= for <var_name> from <expr> to <expr> step <expr> do <expr>
+//for x from 1 to 10 step 1 do print x
+
+<def_fn> ::= function (<var_name>)+ do <expr>  
+<call_fn> ::= call <var_name> <expr>* end 
+
+//function mul10 x do print $x
+
+
 
 <block_expr> ::= begin <expr> .... <expr> end
 

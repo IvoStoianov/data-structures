@@ -128,4 +128,51 @@ public:
 
 };
 
+//<for_expr> ::= for <var_name> from <expr> to <expr> step <expr>
+class For : public Expression
+{
+private:
+	string varName;
+	Expression *fromExpr, *toExpr, *stepExpr, *bodyExpr;
+public:
+	For (string var, 
+		Expression *from,
+		Expression *to,
+		Expression *step,
+		Expression *body);
+		double value ();
+		void print (ostream &out);
+
+
+};
+
+//<def_fn> ::= function (<var_name>)+ do <expr>  
+class FunDef : public Expression
+{
+private:
+	string fnName;
+	vector<string> formArgs;
+	Expression *body;
+public:
+	FunDef (string name, vector<string> a, Expression *b);
+	double value ();
+	void print (ostream &out);
+};
+
+//<call_fn> ::= call <var_name>  <expr>* end 
+
+class CallFn : public Expression
+{
+private:
+	string fnName;
+	vector<Expression*> factArgs;
+public:
+	CallFn (string name, vector<Expression*>args);
+	double value ();
+	void print (ostream &out);
+
+};
+
+
+
 #endif

@@ -38,6 +38,13 @@ public:
 	static const int TokenBegin = 8;
 	static const int TokenEnd = 9;
 	static const int TokenPrint = 10;
+	static const int TokenFor = 11;
+	static const int TokenFrom = 12;
+	static const int TokenTo = 13;
+	static const int TokenStep = 14;
+	static const int TokenDo = 15;
+	static const int TokenFunction = 16;
+	static const int TokenCall = 17;
 
 	int lastTokenType ();
 	string lastTokenString();
