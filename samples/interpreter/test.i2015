@@ -1,0 +1,14 @@
+begin
+	function sum x y z do + $x + $y $z
+
+	function fact x do if $x 
+	  				     then * $x call fact - $x 1 end
+	  				     else 1 
+
+
+	set z 18
+	print call sum 1 2 3 end
+	print $z
+
+	print call fact 5 end 
+end
